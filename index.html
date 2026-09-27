@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#12100E" />
+    <title>لوحة تحكم تفاصيل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#12100E",
+              panel: "#241E18",
+              gold: "#C3986E",
+              sand: "#D1AC81",
+              mist: "#E2E8F0",
+            },
+            fontFamily: {
+              sans: ['"Tajawal"', '"Segoe UI"', "system-ui", "sans-serif"],
+            },
+            boxShadow: {
+              glow: "0 0 60px -15px rgba(195, 152, 110, 0.55)",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body class="min-h-screen bg-ink font-sans text-mist antialiased">
+    <!-- خلفية زخرفية -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden">
+      <div class="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-gold/10 blur-3xl sm:h-96 sm:w-96"></div>
+      <div class="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-sand/10 blur-3xl sm:h-96 sm:w-96"></div>
+    </div>
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="gate" class="relative flex min-h-screen items-center justify-center px-4 py-8 sm:py-10">
+      <form
+        id="gate-form"
+        class="w-full max-w-md rounded-3xl border border-sand/20 bg-panel/80 p-6 shadow-glow backdrop-blur-xl sm:p-10"
+      >
+        <div class="mb-6 flex flex-col items-center text-center">
+          <div
+            class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-[#85633E] text-2xl font-extrabold text-ink shadow-lg sm:h-16 sm:w-16"
+          >
+            ت
+          </div>
+          <p class="text-[11px] font-bold tracking-widest text-sand sm:text-xs">شركة تفاصيل للمظلات الحديثة</p>
+          <h1 class="mt-2 text-2xl font-extrabold text-white sm:text-3xl">لوحة التحكم</h1>
+          <p class="mt-2 text-xs text-mist/70 sm:text-sm">سجّل الدخول للمتابعة إلى لوحة الإدارة.</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-mist/90" for="username">اسم المستخدم</label>
+            <input
+              id="username"
+              type="text"
+              autocomplete="username"
+              autocapitalize="off"
+              autocorrect="off"
+              spellcheck="false"
+              class="w-full rounded-xl border border-sand/25 bg-ink/80 px-4 py-3 text-base text-white outline-none transition placeholder:text-mist/40 focus:border-gold focus:ring-2 focus:ring-gold/30 sm:text-sm"
+              placeholder="admin"
+            />
+          </div>
+
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-mist/90" for="password">كلمة السر</label>
+            <div class="relative">
+              <input
+                id="password"
+                type="password"
+                autocomplete="current-password"
+                class="w-full rounded-xl border border-sand/25 bg-ink/80 px-4 py-3 pl-20 text-base text-white outline-none transition placeholder:text-mist/40 focus:border-gold focus:ring-2 focus:ring-gold/30 sm:text-sm"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                id="toggle-pass"
+                class="absolute inset-y-0 left-2 my-auto h-8 rounded-lg px-3 text-xs font-semibold text-sand/90 transition hover:bg-gold/10 hover:text-gold"
+              >
+                إظهار
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p
+          id="gate-error"
+          class="mt-4 hidden rounded-xl border border-red-400/40 bg-red-950/40 px-3 py-2 text-sm text-red-200"
+        ></p>
+
+        <button
+          type="submit"
+          class="mt-6 w-full rounded-xl bg-gradient-to-l from-gold to-[#85633E] py-3.5 text-sm font-bold text-white shadow-lg transition hover:opacity-95 active:scale-[0.99]"
+        >
+          دخول
+        </button>
+
+        <p class="mt-6 text-center text-[11px] text-mist/50 sm:text-xs">© تفاصيل — جميع الحقوق محفوظة</p>
+      </form>
+    </div>
+
+    <!-- التطبيق -->
+    <div id="app" class="relative hidden">
+      <header class="sticky top-0 z-20 border-b border-sand/15 bg-panel/80 backdrop-blur-xl">
+        <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:py-4">
+          <div class="flex items-center gap-3">
+            <div
+              class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-gold to-[#85633E] text-base font-extrabold text-ink sm:h-10 sm:w-10 sm:text-lg"
+            >
+              ت
+            </div>
+            <div>
+              <p class="text-[10px] font-bold tracking-widest text-sand sm:text-[11px]">تفاصيل</p>
+              <h1 class="text-base font-extrabold text-white sm:text-xl">لوحة تحكم العميل</h1>
+            </div>
+          </div>
+          <button
+            id="lock-btn"
+            type="button"
+            class="rounded-full border border-sand/30 px-3 py-1.5 text-xs font-semibold text-sand transition hover:border-gold hover:text-gold sm:px-4 sm:py-2 sm:text-sm"
+          >
+            قفل
+          </button>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+        <div class="mb-5 flex gap-1.5 rounded-2xl border border-sand/15 bg-panel/60 p-1.5 sm:mb-6 sm:gap-2" role="tablist">
+          <button
+            type="button"
+            data-tab="catalog"
+            class="tab-btn flex-1 rounded-xl px-2 py-2.5 text-xs font-bold transition sm:px-4 sm:text-sm"
+            role="tab"
+          >
+            المنتجات والتصنيفات
+          </button>
+          <button
+            type="button"
+            data-tab="projects"
+            class="tab-btn flex-1 rounded-xl px-2 py-2.5 text-xs font-bold transition sm:px-4 sm:text-sm"
+            role="tab"
+          >
+            معرض المشاريع
+          </button>
+        </div>
+
+        <div id="banner" class="mb-5 hidden rounded-2xl border px-4 py-3 text-sm sm:mb-6" role="alert"></div>
+
+        <section id="panel-catalog">
+          <div class="grid gap-5 lg:grid-cols-2 lg:gap-6">
+            <section class="rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:p-6">
+              <h2 class="flex items-center gap-2 text-base font-extrabold text-white sm:text-lg">
+                <span class="inline-block h-2 w-2 rounded-full bg-gold"></span>
+                إدارة التصنيفات
+              </h2>
+              <form id="category-form" class="mt-4 flex gap-2">
+                <input
+                  id="category-name"
+                  required
+                  class="min-w-0 flex-1 rounded-xl border border-sand/25 bg-ink px-4 py-3 text-base outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30 sm:text-sm"
+                  placeholder="اسم التصنيف"
+                />
+                <button
+                  type="submit"
+                  class="rounded-xl bg-gold px-4 py-3 text-sm font-bold text-ink transition hover:bg-sand active:scale-[0.98] sm:px-5"
+                >
+                  إضافة
+                </button>
+              </form>
+              <ul id="category-list" class="mt-4 space-y-2"></ul>
+            </section>
+
+            <section class="rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:p-6">
+              <h2 class="flex items-center gap-2 text-base font-extrabold text-white sm:text-lg">
+                <span class="inline-block h-2 w-2 rounded-full bg-gold"></span>
+                إضافة منتج
+              </h2>
+              <form id="product-form" class="mt-4 space-y-3">
+                <input id="product-title" required class="field" placeholder="عنوان المنتج" />
+                <select id="product-category" required class="field">
+                  <option value="">اختر التصنيف</option>
+                </select>
+                <textarea id="product-description" required rows="3" class="field" placeholder="الوصف"></textarea>
+                <input
+                  id="product-media"
+                  required
+                  type="file"
+                  accept="image/*,video/*"
+                  class="field file:ml-3 file:rounded-lg file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink"
+                />
+                <p class="text-xs text-mist/60">تُرفع الصورة أو الفيديو إلى التخزين، ويُحفظ الرابط العام في قاعدة البيانات.</p>
+                <button
+                  id="product-submit"
+                  type="submit"
+                  class="w-full rounded-xl bg-gradient-to-l from-gold to-[#85633E] py-3 text-sm font-bold text-white shadow-md transition hover:opacity-95 active:scale-[0.99]"
+                >
+                  حفظ المنتج
+                </button>
+              </form>
+            </section>
+          </div>
+
+          <section class="mt-5 rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:mt-6 sm:p-6">
+            <h2 class="flex items-center gap-2 text-base font-extrabold text-white sm:text-lg">
+              <span class="inline-block h-2 w-2 rounded-full bg-gold"></span>
+              المنتجات الحالية
+            </h2>
+            <div id="product-list" class="mt-4 grid gap-4 sm:grid-cols-2"></div>
+          </section>
+        </section>
+
+        <section id="panel-projects" class="hidden">
+          <section class="rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:p-6">
+            <h2 class="flex items-center gap-2 text-base font-extrabold text-white sm:text-lg">
+              <span class="inline-block h-2 w-2 rounded-full bg-gold"></span>
+              إضافة مشروع
+            </h2>
+            <form id="project-form" class="mt-4 space-y-3">
+              <input id="project-title" required class="field" placeholder="عنوان المشروع" />
+              <textarea id="project-description" required rows="3" class="field" placeholder="الوصف"></textarea>
+              <input
+                id="project-media"
+                required
+                type="file"
+                accept="image/*,video/*"
+                class="field file:ml-3 file:rounded-lg file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink"
+              />
+              <p class="text-xs text-mist/60">تُرفع الصورة أو الفيديو إلى التخزين، ويُحفظ الرابط العام في قاعدة البيانات.</p>
+              <button
+                id="project-submit"
+                type="submit"
+                class="w-full rounded-xl bg-gradient-to-l from-gold to-[#85633E] py-3 text-sm font-bold text-white shadow-md transition hover:opacity-95 active:scale-[0.99]"
+              >
+                حفظ المشروع
+              </button>
+            </form>
+          </section>
+
+          <section class="mt-5 rounded-3xl border border-sand/15 bg-panel/70 p-5 shadow-lg backdrop-blur-sm sm:mt-6 sm:p-6">
+            <h2 class="flex items-center gap-2 text-base font-extrabold text-white sm:text-lg">
+              <span class="inline-block h-2 w-2 rounded-full bg-gold"></span>
+              المشاريع الحالية
+            </h2>
+            <div id="project-list" class="mt-4 grid gap-4 sm:grid-cols-2"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <style>
+      .field {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(209, 172, 129, 0.25);
+        background: #12100e;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        color: #e2e8f0;
+      }
+      @media (min-width: 640px) {
+        .field {
+          font-size: 0.875rem;
+        }
+      }
+      .field:focus {
+        border-color: #c3986e;
+        box-shadow: 0 0 0 3px rgba(195, 152, 110, 0.25);
+      }
+      .tab-btn {
+        border: 1px solid transparent;
+        background: transparent;
+        color: #e2e8f0;
+      }
+      .tab-btn:hover {
+        background: rgba(195, 152, 110, 0.08);
+      }
+      .tab-btn.is-active {
+        border-color: transparent;
+        background: linear-gradient(to left, #c3986e, #d1ac81);
+        color: #12100e;
+        box-shadow: 0 4px 14px -4px rgba(195, 152, 110, 0.5);
+      }
+      /* تحسين ظهور حقول الإدخال على iOS */
+      input,
+      select,
+      textarea {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      /* منع تكبير الشاشة تلقائيًا على iOS */
+      @media (max-width: 640px) {
+        input,
+        select,
+        textarea,
+        button {
+          font-size: 16px;
+        }
+      }
+      /* شريط تمرير أنيق */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #12100e;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(195, 152, 110, 0.4);
+        border-radius: 8px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(195, 152, 110, 0.6);
+      }
+    </style>
+
+    <script type="module">
+      import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        deleteDoc,
+        doc,
+        query,
+        orderBy,
+        serverTimestamp,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCfe92epuUQY7oHOdbwLYPDx7jgtgP6-MI",
+        authDomain: "tafasel-4840c.firebaseapp.com",
+        projectId: "tafasel-4840c",
+        storageBucket: "tafasel-4840c.firebasestorage.app",
+        messagingSenderId: "1093253713976",
+        appId: "1:1093253713976:web:c5d29fefe320f35312d6cd",
+      };
+
+      const ADMIN_USERNAME = "admin";
+      const ADMIN_PASSWORD = "admin2026";
+      const SESSION_KEY = "tafasil-admin-unlocked";
+
+      const SUPABASE_URL = "https://wqmbrxyiivrmnekwaenl.supabase.co";
+      const SUPABASE_ANON_KEY = "sb_publishable_7UaosEk3WMZmdRLQQexFuQ_PMR4AZQq";
+      const BUCKET_NAME = "media";
+      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const gate = document.getElementById("gate");
+      const appRoot = document.getElementById("app");
+      const gateForm = document.getElementById("gate-form");
+      const usernameInput = document.getElementById("username");
+      const passwordInput = document.getElementById("password");
+      const togglePassBtn = document.getElementById("toggle-pass");
+      const gateError = document.getElementById("gate-error");
+      const banner = document.getElementById("banner");
+
+      let categories = [];
+      let stopWatchers = () => {};
+      let noticeTimer = 0;
+      let lastNotice = "";
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function safeUrl(url) {
+        const value = String(url || "").trim();
+        if (/^data:image\/[a-z0-9.+-]+;base64,[a-z0-9+/=\s]+$/i.test(value)) return value;
+        if (/^data:video\/[a-z0-9.+-]+;base64,[a-z0-9+/=\s]+$/i.test(value)) return value;
+        try {
+          const parsed = new URL(value);
+          if (parsed.protocol === "https:" || parsed.protocol === "http:") return parsed.href;
+        } catch {
+          /* ignore invalid urls */
+        }
+        return "";
+      }
+
+      function errorMessage(error) {
+        if (error?.code === "permission-denied") {
+          return "رفضت قواعد Firestore هذه العملية. اسمح بالقراءة والكتابة لمجموعات categories و products و projects.";
+        }
+        return error?.message || "حدث خطأ غير متوقع";
+      }
+
+      function notify(message, kind) {
+        const key = `${kind}:${message}`;
+        if (key === lastNotice) return;
+        lastNotice = key;
+        banner.textContent = message;
+        banner.classList.remove(
+          "hidden",
+          "border-red-400/40",
+          "bg-red-950/40",
+          "text-red-100",
+          "border-emerald-400/40",
+          "bg-emerald-950/40",
+          "text-emerald-100"
+        );
+        if (kind === "error") {
+          banner.classList.add("border-red-400/40", "bg-red-950/40", "text-red-100");
+        } else {
+          banner.classList.add("border-emerald-400/40", "bg-emerald-950/40", "text-emerald-100");
+        }
+        window.clearTimeout(noticeTimer);
+        noticeTimer = window.setTimeout(
+          () => {
+            banner.classList.add("hidden");
+            lastNotice = "";
+          },
+          kind === "error" ? 8000 : 4000
+        );
+      }
+
+      function mediaMarkup(item) {
+        const src = safeUrl(item.mediaUrl);
+        if (!src) {
+          return '<div class="flex h-40 items-center justify-center rounded-xl bg-ink text-xs text-mist/50">لا توجد وسائط</div>';
+        }
+        const type =
+          item.mediaType === "video" ||
+          src.startsWith("data:video/") ||
+          /\.(mp4|webm|ogg|mov|m4v)(?:$|[?#])/i.test(src)
+            ? "video"
+            : "image";
+        if (type === "video") {
+          return `<video src="${escapeHtml(src)}" class="h-40 w-full rounded-xl bg-black object-cover" controls playsinline preload="metadata" autocomplete="off"></video>`;
+        }
+        return `<img src="${escapeHtml(src)}" alt="" class="h-40 w-full rounded-xl object-cover" />`;
+      }
+
+      function emptyState(text) {
+        return `<p class="col-span-full py-8 text-center text-sm text-mist/60">${escapeHtml(text)}</p>`;
+      }
+
+      function rowsFromSnapshot(snapshot) {
+        return snapshot.docs
+          .map((item) => ({ id: item.id, ...item.data() }))
+          .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0));
+      }
+
+      function watchCollection(name, onData) {
+        let fallbackUnsub = null;
+        const deliver = (snapshot) => onData(rowsFromSnapshot(snapshot), null);
+        const fail = (error) => {
+          if (error?.code === "failed-precondition" && !fallbackUnsub) {
+            fallbackUnsub = onSnapshot(
+              collection(db, name),
+              deliver,
+              (fallbackError) => {
+                onData([], fallbackError);
+                notify(errorMessage(fallbackError), "error");
+              }
+            );
+            return;
+          }
+          onData([], error);
+          notify(errorMessage(error), "error");
+        };
+        const unsub = onSnapshot(query(collection(db, name), orderBy("createdAt", "desc")), deliver, fail);
+        return () => {
+          unsub();
+          if (typeof fallbackUnsub === "function") fallbackUnsub();
+        };
+      }
+
+      function startWatchers() {
+        stopWatchers();
+        const unsubscribers = [
+          watchCollection("categories", (rows, error) => {
+            if (error) {
+              categories = [];
+              document.getElementById("category-list").innerHTML = emptyState("تعذر تحميل التصنيفات.");
+              document.getElementById("product-category").innerHTML = '<option value="">اختر التصنيف</option>';
+              return;
+            }
+            categories = rows
+              .map((item) => ({ id: item.id, name: String(item.name || "").trim() }))
+              .filter((item) => item.name);
+            renderCategories();
+          }),
+          watchCollection("products", (rows, error) => {
+            if (error) {
+              document.getElementById("product-list").innerHTML = emptyState("تعذر تحميل المنتجات.");
+              return;
+            }
+            renderProducts(rows);
+          }),
+          watchCollection("projects", (rows, error) => {
+            if (error) {
+              document.getElementById("project-list").innerHTML = emptyState("تعذر تحميل المشاريع.");
+              return;
+            }
+            renderProjects(rows);
+          }),
+        ];
+        stopWatchers = () => {
+          unsubscribers.forEach((unsub) => unsub());
+          stopWatchers = () => {};
+        };
+      }
+
+      function renderCategories() {
+        const list = document.getElementById("category-list");
+        const select = document.getElementById("product-category");
+        const current = select.value;
+
+        if (!categories.length) {
+          list.innerHTML = emptyState("لا توجد تصنيفات بعد.");
+        } else {
+          list.innerHTML = categories
+            .map(
+              (item) => `
+                <li class="flex items-center justify-between gap-3 rounded-xl border border-sand/15 bg-ink px-3 py-2">
+                  <span class="text-sm">${escapeHtml(item.name)}</span>
+                  <button type="button" data-delete="categories" data-id="${escapeHtml(item.id)}" class="rounded-lg border border-red-400/40 px-3 py-1 text-xs text-red-200">حذف</button>
+                </li>`
+            )
+            .join("");
+        }
+
+        const named = [...categories].sort((a, b) => a.name.localeCompare(b.name, "ar"));
+        const options = ['<option value="">اختر التصنيف</option>']
+          .concat(named.map((item) => `<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`))
+          .join("");
+        select.innerHTML = options;
+        if ([...select.options].some((option) => option.value === current)) select.value = current;
+      }
+
+      function renderProducts(items) {
+        const list = document.getElementById("product-list");
+        if (!items.length) {
+          list.innerHTML = emptyState("لا توجد منتجات بعد.");
+          return;
+        }
+        list.innerHTML = items
+          .map(
+            (item) => `
+              <article class="overflow-hidden rounded-2xl border border-sand/15 bg-ink p-3">
+                ${mediaMarkup(item)}
+                <div class="mt-3">
+                  <p class="text-xs text-sand">${escapeHtml(item.category || "بدون تصنيف")}</p>
+                  <h3 class="mt-1 font-bold text-white">${escapeHtml(item.title || "منتج")}</h3>
+                  <p class="mt-2 text-sm leading-relaxed text-mist/80">${escapeHtml(item.description || "")}</p>
+                  <button type="button" data-delete="products" data-id="${escapeHtml(item.id)}" class="mt-3 rounded-lg border border-red-400/40 px-3 py-1.5 text-xs text-red-200">حذف</button>
+                </div>
+              </article>`
+          )
+          .join("");
+      }
+
+      function renderProjects(items) {
+        const list = document.getElementById("project-list");
+        if (!items.length) {
+          list.innerHTML = emptyState("لا توجد مشاريع بعد.");
+          return;
+        }
+        list.innerHTML = items
+          .map(
+            (item) => `
+              <article class="overflow-hidden rounded-2xl border border-sand/15 bg-ink p-3">
+                ${mediaMarkup(item)}
+                <div class="mt-3">
+                  <h3 class="font-bold text-white">${escapeHtml(item.title || "مشروع")}</h3>
+                  <p class="mt-2 text-sm leading-relaxed text-mist/80">${escapeHtml(item.description || "")}</p>
+                  <button type="button" data-delete="projects" data-id="${escapeHtml(item.id)}" class="mt-3 rounded-lg border border-red-400/40 px-3 py-1.5 text-xs text-red-200">حذف</button>
+                </div>
+              </article>`
+          )
+          .join("");
+      }
+
+      function mediaTypeOf(file) {
+        if (file.type.startsWith("video/") || /\.(mp4|webm|ogg|mov|m4v)$/i.test(file.name)) return "video";
+        return "image";
+      }
+
+      async function uploadToSupabase(file) {
+        const filePath = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+        const { error } = await supabaseClient.storage.from(BUCKET_NAME).upload(filePath, file);
+        if (error) throw error;
+        const { data: publicUrlData } = supabaseClient.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+        if (!publicUrlData?.publicUrl) throw new Error("تعذر الحصول على الرابط العام للملف.");
+        return publicUrlData.publicUrl;
+      }
+
+      async function mediaFromFile(file, existingUrl = "", existingType = "") {
+        if (!file) {
+          if (!existingUrl) throw new Error("اختر صورة أو فيديو.");
+          return { mediaUrl: existingUrl, mediaType: existingType || "image", notice: "" };
+        }
+        const mediaUrl = await uploadToSupabase(file);
+        return { mediaUrl, mediaType: mediaTypeOf(file) };
+      }
+
+      function setBusy(button, busy, idleLabel) {
+        button.disabled = busy;
+        button.textContent = busy ? "جاري الضغط…" : idleLabel;
+        button.classList.toggle("opacity-60", busy);
+      }
+
+      function activateTab(name) {
+        document.querySelectorAll(".tab-btn").forEach((button) => {
+          button.classList.toggle("is-active", button.dataset.tab === name);
+          button.setAttribute("aria-selected", button.dataset.tab === name ? "true" : "false");
+        });
+        document.getElementById("panel-catalog").classList.toggle("hidden", name !== "catalog");
+        document.getElementById("panel-projects").classList.toggle("hidden", name !== "projects");
+      }
+
+      function openApp() {
+        sessionStorage.setItem(SESSION_KEY, "1");
+        gate.classList.add("hidden");
+        appRoot.classList.remove("hidden");
+        activateTab("catalog");
+        document.getElementById("category-list").innerHTML = emptyState("جاري التحميل…");
+        document.getElementById("product-list").innerHTML = emptyState("جاري التحميل…");
+        document.getElementById("project-list").innerHTML = emptyState("جاري التحميل…");
+        startWatchers();
+      }
+
+      togglePassBtn.addEventListener("click", () => {
+        const isHidden = passwordInput.type === "password";
+        passwordInput.type = isHidden ? "text" : "password";
+        togglePassBtn.textContent = isHidden ? "إخفاء" : "إظهار";
+      });
+
+      gateForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+          gateError.textContent = "اسم المستخدم أو كلمة السر غير صحيحة.";
+          gateError.classList.remove("hidden");
+          return;
+        }
+        gateError.classList.add("hidden");
+        openApp();
+      });
+
+      document.getElementById("lock-btn").addEventListener("click", () => {
+        stopWatchers();
+        sessionStorage.removeItem(SESSION_KEY);
+        appRoot.classList.add("hidden");
+        gate.classList.remove("hidden");
+        usernameInput.value = "";
+        passwordInput.value = "";
+        passwordInput.type = "password";
+        togglePassBtn.textContent = "إظهار";
+      });
+
+      document.querySelectorAll(".tab-btn").forEach((button) => {
+        button.addEventListener("click", () => activateTab(button.dataset.tab));
+      });
+
+      document.getElementById("category-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const input = document.getElementById("category-name");
+        const button = event.submitter;
+        const name = input.value.trim();
+        if (!name) {
+          notify("اكتب اسم التصنيف.", "error");
+          return;
+        }
+        if (categories.some((item) => item.name === name)) {
+          notify("هذا التصنيف موجود بالفعل.", "error");
+          return;
+        }
+        if (button) button.disabled = true;
+        try {
+          await addDoc(collection(db, "categories"), { name, createdAt: serverTimestamp() });
+          input.value = "";
+          notify("تمت إضافة التصنيف.", "ok");
+        } catch (error) {
+          notify(errorMessage(error), "error");
+        } finally {
+          if (button) button.disabled = false;
+        }
+      });
+
+      document.getElementById("product-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = document.getElementById("product-submit");
+        const file = document.getElementById("product-media").files[0];
+        const title = document.getElementById("product-title").value.trim();
+        const category = document.getElementById("product-category").value;
+        const description = document.getElementById("product-description").value.trim();
+        if (!title || !category || !description) {
+          notify("أكمل عنوان المنتج والتصنيف والوصف.", "error");
+          return;
+        }
+        if (!file) {
+          notify("اختر صورة أو فيديو للمنتج.", "error");
+          return;
+        }
+
+        setBusy(button, true, "حفظ المنتج");
+        try {
+          const media = await mediaFromFile(file);
+          await addDoc(collection(db, "products"), {
+            title,
+            category,
+            description,
+            mediaUrl: media.mediaUrl,
+            mediaType: media.mediaType,
+            createdAt: serverTimestamp(),
+          });
+          event.target.reset();
+          notify(media.notice || "تم حفظ المنتج.", "ok");
+        } catch (error) {
+          notify(errorMessage(error), "error");
+        } finally {
+          setBusy(button, false, "حفظ المنتج");
+        }
+      });
+
+      document.getElementById("project-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = document.getElementById("project-submit");
+        const file = document.getElementById("project-media").files[0];
+        const title = document.getElementById("project-title").value.trim();
+        const description = document.getElementById("project-description").value.trim();
+        if (!title || !description) {
+          notify("أكمل عنوان المشروع والوصف.", "error");
+          return;
+        }
+        if (!file) {
+          notify("اختر صورة أو فيديو للمشروع.", "error");
+          return;
+        }
+
+        setBusy(button, true, "حفظ المشروع");
+        try {
+          const media = await mediaFromFile(file);
+          await addDoc(collection(db, "projects"), {
+            title,
+            description,
+            mediaUrl: media.mediaUrl,
+            mediaType: media.mediaType,
+            createdAt: serverTimestamp(),
+          });
+          event.target.reset();
+          notify(media.notice || "تم حفظ المشروع.", "ok");
+        } catch (error) {
+          notify(errorMessage(error), "error");
+        } finally {
+          setBusy(button, false, "حفظ المشروع");
+        }
+      });
+
+      document.getElementById("app").addEventListener("click", async (event) => {
+        const button = event.target.closest("[data-delete]");
+        if (!button || button.disabled) return;
+        const collectionName = button.dataset.delete;
+        const id = button.dataset.id;
+        if (!id || !["categories", "products", "projects"].includes(collectionName)) return;
+        const labels = { categories: "التصنيف", products: "المنتج", projects: "المشروع" };
+        if (!confirm(`حذف ${labels[collectionName]}؟`)) return;
+        button.disabled = true;
+        try {
+          await deleteDoc(doc(db, collectionName, id));
+          notify("تم الحذف.", "ok");
+        } catch (error) {
+          button.disabled = false;
+          notify(errorMessage(error), "error");
+        }
+      });
+
+      window.addEventListener("unhandledrejection", (event) => {
+        event.preventDefault();
+        notify(errorMessage(event.reason), "error");
+      });
+
+      if (sessionStorage.getItem(SESSION_KEY) === "1") openApp();
+    </script>
+  </body>
+</html>
